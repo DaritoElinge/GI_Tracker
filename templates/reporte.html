@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte - {{ year }}-{{ month }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <!--Google Fonts SUSE-->
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('seleccionar_reporte') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Volver Atrás
+                </a>
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fa-solid fa-house" style="padding: 5px"></i>  Inicio
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Reporte-Seccion -->
+    <section class="section-reporte" style="padding-top: 85px;">
+        <div class="container-reporte">
+            <h1 class="title">Reporte de {{ month }}-{{ year }}</h1>
+            <h2 class="subtitle">Total Ingresos: ${{ total_ingresos }}</h2>
+            <h2 class="subtitle">Total Gastos: ${{ total_gastos }}</h2>
+            <h2 class="subtitle">Saldo: ${{ saldo }}</h2>
+
+            <h3 class="subtitle">Ingresos</h3>
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingreso in ingresos %}
+                    <tr>
+                        <td>{{ ingreso.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ ingreso.category }}</td>
+                        <td>${{ ingreso.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h3 class="subtitle">Gastos</h3>
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
+                    <tr>
+                        <td>{{ gasto.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ gasto.category }}</td>
+                        <td>${{ gasto.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

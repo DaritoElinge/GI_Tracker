@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Reporte</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <!--Google Fonts SUSE-->
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+   <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Volver Atrás
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Seleccionar Reporte -Seccion -->
+    <section class="section-sltReporte" style="padding-top: 85px;">
+        <div class="container-sltReporte">
+            <h1 class="title">Seleccionar Reporte</h1>
+            <form method="POST" action="{{ url_for('reporte') }}">
+                <div class="field">
+                    <label class="label">Año</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="year" required>
+                                {% for year in years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Mes</label>
+                    <div class="control">
+                        <div class="select">
+                            <select name="month" required>
+                                {% for mes in meses %}
+                                    <option value="{{ mes.numero }}">{{ mes.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="button is-primary" type="submit">Generar Reporte</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

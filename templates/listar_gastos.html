@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Gastos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Volver Atrás
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Gastos-Seccion -->
+    <section class="section-gastos" style="margin-top: 75px;">
+        <div class="container-gastos">
+            <h1 class="title">Registro de Gastos</h1>
+            
+            <form id="gasto-form">
+                <div class="field">
+                    <label class="label">Fecha</label>
+                    <div class="control">
+                        <input class="input" type="date" name="date" required>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Categoría</label>
+                    <div class="control">
+                        <div class="select">
+                            <select id="SltGastos" name="category">
+                                <option value="Compras">Compras</option>
+                                <option value="Educación">Educación</option>
+                                <option value="Salud">Salud</option>
+                                <option value="Viaje">Viaje</option>
+                                <option value="Caprichos">Caprichos</option>
+                                <option value="Repación">Reparación</option>
+                                <option value="Electrodomésticos">Electrodomésticos</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Descripción</label>
+                    <div class="control">
+                        <input class="input" type="text" name="description" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Monto</label>
+                    <div class="control">
+                        <input class="input" type="number" name="amount" step="0.01" required>
+                    </div>
+                </div>
+                <button class="button is-primary" type="submit">Añadir Gasto</button>
+            </form>
+
+            <hr>
+
+            <h2 class="subtitle">Gastos Totales: $<span id="total-gasto">{{ total_gasto }}</span></h2>
+
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="gastos-list">
+                    {% for gasto in gastos %}
+                    <tr>
+                        <td>{{ gasto.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ gasto.category }}</td>
+                        <td>{{ gasto.description }}</td>
+                        <td>${{ gasto.amount }}</td>
+                        <td>
+                            <button class="button is-small is-danger" onclick="deleteGasto({{ gasto.id }})">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchGastos();
+        });
+    
+        function fetchGastos() {
+            fetch('/gastos', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateGastosList(data.gastos);
+                totalGastoElem.textContent = data.total_gasto.toFixed(2);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        const gastoForm = document.getElementById('gasto-form');
+        const gastosList = document.getElementById('gastos-list');
+        const totalGastoElem = document.getElementById('total-gasto');
+    
+        gastoForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(gastoForm);
+    
+            fetch('/gastos', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateGastosList(data.gastos);
+                totalGastoElem.textContent = data.total_gasto.toFixed(2);
+                gastoForm.reset(); // Limpiar formulario
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    
+        function updateGastosList(gastos) {
+            gastosList.innerHTML = '';
+            gastos.forEach(gasto => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${gasto.date}</td>
+                    <td>${gasto.category}</td>
+                    <td>${gasto.description}</td>
+                    <td>$${gasto.amount.toFixed(2)}</td>
+                    <td>
+                        <button class="button is-small is-danger" onclick="deleteGasto(${gasto.id})">Eliminar</button>
+                    </td>
+                `;
+                gastosList.appendChild(tr);
+            });
+        }
+    
+        function deleteGasto(id) {
+            const confirmDelete = confirm('¿Seguro que quiere eliminar este gasto?');
+            if (confirmDelete) {
+                const formData = new FormData();
+                formData.append('id', id);
+    
+                fetch('/gastos', {
+                    method: 'DELETE',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateGastosList(data.gastos);
+                    totalGastoElem.textContent = data.total_gasto.toFixed(2);
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                console.log('Eliminación cancelada');
+            }
+        }
+    
+        // Para sacar el icono de hamburguesa para hacerlo responsive
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>

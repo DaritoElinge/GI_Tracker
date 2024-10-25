@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Ingresos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <!--Google Fonts SUSE-->
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Volver Atrás
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Ingresos-Seccion -->
+    <section class="section-ingresos" style="margin-top: 75px;">
+        <div class="container-ingresos">
+            <h1 class="title">Registro de Ingresos</h1>
+            
+            <form id="ingreso-form">
+                <div class="field">
+                    <label class="label">Fecha</label>
+                    <div class="control">
+                        <input class="input" type="date" name="date" required>
+                    </div>
+                </div>
+
+                
+                <div class="field">
+                    <label class="label">Categoría</label>
+                    <div class="control">
+                        <div class="select">
+                            <select id="SltIngresos" name="category">
+                                <option value="Salario">Salario</option>
+                                <option value="Inversiones">Inversiones</option>
+                                <option value="Tiempo Parcial">Tiempo Parcial</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Monto</label>
+                    <div class="control">
+                        <input class="input" type="number" name="amount" step="0.01" required>
+                    </div>
+                </div>
+                <button class="button is-primary" type="submit">Añadir Ingreso</button>
+            </form>
+
+            <hr>
+
+            <h2 class="subtitle">Ingresos Totales: $<span id="total-ingreso">{{ total_ingreso }}</span></h2>
+
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Monto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="ingresos-list">
+                    <!-- Ingresos se añaden aquí dinámicamente -->
+                    {% for ingreso in ingresos %}
+                    <tr>
+                        <td>{{ ingreso.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ ingreso.category }}</td>
+                        <td>${{ ingreso.amount }}</td>
+                        <td>
+                            <button class="button is-small is-danger" onclick="deleteIngreso({{ ingreso.id }})">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchIngresos();
+        });
+    
+        function fetchIngresos() {
+            fetch('/ingresos', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateIngresosList(data.ingresos);
+                totalIngresoElem.textContent = data.total_ingreso.toFixed(2);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        const ingresoForm = document.getElementById('ingreso-form');
+        const ingresosList = document.getElementById('ingresos-list');
+        const totalIngresoElem = document.getElementById('total-ingreso');
+    
+        ingresoForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(ingresoForm);
+    
+            fetch('/ingresos', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateIngresosList(data.ingresos);
+                totalIngresoElem.textContent = data.total_ingreso.toFixed(2);
+                ingresoForm.reset(); // Limpiar formulario
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    
+        function updateIngresosList(ingresos) {
+            ingresosList.innerHTML = '';
+            ingresos.forEach(ingreso => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${ingreso.date}</td>
+                    <td>${ingreso.category}</td>
+                    <td>$${ingreso.amount.toFixed(2)}</td>
+                    <td>
+                        <button class="button is-small is-danger" onclick="deleteIngreso(${ingreso.id})">Eliminar</button>
+                    </td>
+                `;
+                ingresosList.appendChild(tr);
+            });
+        }
+    
+        function deleteIngreso(id) {
+            const confirmDelete = confirm('¿Seguro que quiere eliminar este ingreso?');
+    
+            if (confirmDelete) {
+                const formData = new FormData();
+                formData.append('id', id);
+    
+                fetch('/ingresos', {
+                    method: 'DELETE',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateIngresosList(data.ingresos);
+                    totalIngresoElem.textContent = data.total_ingreso.toFixed(2);
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                console.log('Eliminación cancelada');
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>

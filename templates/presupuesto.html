@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Presupuestos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <!-- Google Fonts SUSE -->
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Volver Atrás
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- Presupuestos-Sección -->
+    <section class="section-presupuesto" style="margin-top: 75px;">
+        <div class="container-presupuesto">
+            <h1 class="title">Registro de Presupuestos</h1>
+            
+            <form id="presupuesto-form">
+                <div class="field">
+                    <label class="label">Nombre</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nombre" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Descripción</label>
+                    <div class="control">
+                        <input class="input" type="text" name="descripcion" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Monto Total</label>
+                    <div class="control">
+                        <input class="input" type="number" name="monto_total" step="0.01" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Fecha de Inicio</label>
+                    <div class="control">
+                        <input class="input" type="date" name="start_date" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Fecha de Fin</label>
+                    <div class="control">
+                        <input class="input" type="date" name="end_date" required>
+                    </div>
+                </div>
+                <button class="button is-primary" type="submit">Añadir Presupuesto</button>
+            </form>
+
+            <hr>
+
+            <h2 class="subtitle">Presupuestos</h2>
+
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Monto Total</th>
+                        <th>Fecha de Inicio</th>
+                        <th>Fecha de Fin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="presupuestos-list">
+                    <!-- Presupuestos se añaden aquí dinámicamente -->
+                    {% for presupuesto in presupuestos %}
+                    <tr>
+                        <td>{{ presupuesto.nombre }}</td>
+                        <td>{{ presupuesto.descripcion }}</td>
+                        <td>${{ presupuesto.monto_total }}</td>
+                        <td>{{ presupuesto.fecha_inicio.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ presupuesto.fecha_fin.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('presupuesto_detalle', id=presupuesto.id) }}" class="button is-small is-info">Ver Detalle</a>
+                            <button class="button is-small is-danger" onclick="deletePresupuesto({{ presupuesto.id }})">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aquí puedes cargar los presupuestos si es necesario
+        });
+    
+        const presupuestoForm = document.getElementById('presupuesto-form');
+        const presupuestosList = document.getElementById('presupuestos-list');
+    
+        presupuestoForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(presupuestoForm);
+    
+            fetch('/presupuesto', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.presupuestos) {
+                    updatePresupuestosList(data.presupuestos);
+                    presupuestoForm.reset();  // Limpiar el formulario
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    
+        function updatePresupuestosList(presupuestos) {
+            presupuestosList.innerHTML = '';
+            presupuestos.forEach(presupuesto => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${presupuesto.nombre}</td>
+                    <td>${presupuesto.descripcion}</td>
+                    <td>$${presupuesto.monto_total.toFixed(2)}</td>
+                    <td>${presupuesto.fecha_inicio}</td>
+                    <td>${presupuesto.fecha_fin}</td>
+                    <td>
+                        <a href="/presupuestodetalle/${presupuesto.id}" class="button is-small is-info">Ver Detalle</a>
+                        <button class="button is-small is-danger" onclick="deletePresupuesto(${presupuesto.id})">Eliminar</button>
+                    </td>
+                `;
+                presupuestosList.appendChild(tr);
+            });
+        }
+    
+        function deletePresupuesto(id) {
+            // Mostrar una alerta de confirmación antes de eliminar
+            const confirmDelete = confirm('¿Seguro que quiere eliminar este presupuesto?');
+    
+            if (confirmDelete) {
+                fetch('/presupuesto', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.presupuestos) {
+                        updatePresupuestosList(data.presupuestos);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                console.log('Eliminación cancelada');
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>

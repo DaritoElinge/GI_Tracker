@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Presupuesto</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('presupuesto') }}">
+                    <i class="fas fa-arrow-left" style="padding: 5px"></i> Volver a Presupuestos
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Detalle-Presupuesto-Sección -->
+    <section class="section-dtllPresupuesto" style="margin-top: 75px;">
+        <div class="container-dtllPresupuesto">
+            <h1 class="title">Detalle del Presupuesto: {{ presupuesto.nombre }}</h1>
+        
+            <div>
+                <p><strong>Monto total:</strong> {{ presupuesto.monto_total }} </p>
+                <p><strong>Monto restante:</strong> <span id="monto_restante">{{ presupuesto.calcular_monto_restante() }}</span></p>
+            </div>
+        
+            <hr>
+        
+            <h2 class="title">Agregar Ingreso/Gasto</h2>
+            <form id="detalleForm">
+                <div class="field">
+                    <label class="label">Descripción</label>
+                    <div class="control">
+                        <input class="input" type="text" id="descripcion" name="descripcion" placeholder="Descripción" required>
+                    </div>
+                </div>
+        
+                <div class="field">
+                    <label class="label">Monto</label>
+                    <div class="control">
+                        <input class="input" type="number" id="monto" name="monto" placeholder="Monto" step="0.01" required>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label">Fecha de asignación</label>
+                    <div class="control">
+                        <input class="input" type="date" id="fecha_asignacion" name="fecha_asignacion" required>
+                    </div>
+                </div>
+        
+                <div class="field">
+                    <label class="label">Tipo</label>
+                    <div class="control">
+                        <div class="select">
+                            <select id="tipo" name="tipo">
+                                <option value="0">Gasto</option>
+                                <option value="1">Ingreso</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="control">
+                    <button type="submit" class="button is-primary">Agregar</button>
+                </div>
+            </form>
+        
+            <hr>
+        
+            <h2 class="title">Detalles</h2>
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="detalle-list">
+                    {% for detalle in presupuesto.detalles %}
+                    <tr data-id="{{ detalle.id }}">
+                        <td>{{ detalle.descripcion }}</td>
+                        <td>{{ detalle.monto }}</td>
+                        <td>{{ 'Ingreso' if detalle.tipo == 1 else 'Gasto' }}</td>
+                        <td>{{ detalle.fecha_asignacion }}</td>
+                        <td>
+                            <button class="button is-danger is-small" onclick="eliminarDetalle({{ detalle.id }})">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>        
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicialización si es necesario
+        });
+    
+        const detalleForm = document.getElementById('detalleForm');
+        const detalleList = document.getElementById('detalle-list');
+        const montoRestanteElem = document.getElementById('monto_restante');
+    
+        detalleForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(detalleForm);
+            const data = {
+                descripcion: formData.get('descripcion'),
+                monto: parseFloat(formData.get('monto')),
+                tipo: parseInt(formData.get('tipo')),
+                fecha_asignacion: formData.get('fecha_asignacion')
+            };
+    
+            fetch(`/presupuestodetalle/{{ presupuesto.id }}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    agregarDetalleALaLista(data.detalle);
+                    montoRestanteElem.textContent = data.monto_restante.toFixed(2);
+                    detalleForm.reset(); // Limpiar formulario
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    
+        function agregarDetalleALaLista(detalle) {
+            const newRow = `
+                <tr data-id="${detalle.id}">
+                    <td>${detalle.descripcion}</td>
+                    <td>${detalle.monto.toFixed(2)}</td>
+                    <td>${detalle.tipo === 1 ? 'Ingreso' : 'Gasto'}</td>
+                    <td>${detalle.fecha_asignacion}</td>
+                    <td>
+                        <button class="button is-danger is-small" onclick="confirmarEliminarDetalle(${detalle.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            detalleList.insertAdjacentHTML('beforeend', newRow);
+        }
+    
+        function confirmarEliminarDetalle(detalleId) {
+            // Confirmar antes de eliminar
+            const confirmacion = confirm('¿Estás seguro de que deseas eliminar este detalle?');
+            if (confirmacion) {
+                eliminarDetalle(detalleId);
+            }
+        }
+    
+        function eliminarDetalle(detalleId) {
+            fetch(`/presupuestodetalle/eliminar/${detalleId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const row = document.querySelector(`tr[data-id="${detalleId}"]`);
+                    if (row) {
+                        row.remove();
+                    }
+                    montoRestanteElem.textContent = data.monto_restante.toFixed(2);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        // Manejo del icono de hamburguesa para navegación responsive
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>

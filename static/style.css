@@ -1,0 +1,97 @@
+/* Me permite definir la paleta de colores personalizada en bulma */
+:root {
+  /* Color para success en HX = #1DA50D */
+    --bulma-success-h: 114deg; 
+    --bulma-success-s: 85%;    
+    --bulma-success-l: 35%;    
+  }
+  
+/* Importa las variables de Bulma para la personalización */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css');
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "SUSE", sans-serif;
+}
+
+body {
+  margin: 12px;
+}
+
+
+/* Define el botón verde usando tu color personalizado */
+.button.is-success {
+    background-color: hsl(var(--bulma-success-h), var(--bulma-success-s), var(--bulma-success-l)) !important;
+    border-color: hsl(var(--bulma-success-h), var(--bulma-success-s), var(--bulma-success-l)) !important;
+    color: #fff !important; /* Asegúrate de que el texto sea visible */
+  }
+  
+.button.is-success:hover {
+    background-color: hsl(var(--bulma-success-h), var(--bulma-success-s), 45%) !important;
+    border-color: hsl(var(--bulma-success-h), var(--bulma-success-s), 45%) !important;
+  }
+
+
+/* Personalización de las plantillas */
+/* Inicio - Registro - Login */
+
+.box {
+  padding: 10px;
+}
+
+/* Logo del INICIO*/
+#logo_img {
+  width: 85px;
+  height: 85px;
+  margin: 0 auto;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+/* Efecto de flotar */
+@keyframes float {
+  0%, 100% {
+      transform: translateY(0);
+  }
+  50% {
+      transform: translateY(-10px);
+  }
+}
+
+
+/* Home - Pagina Principal */
+
+/* Navbar */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-burger {
+  border: none;
+}
+
+/* Make sure the burger menu is hidden on larger screens */
+@media screen and (min-width: 1024px) {
+  .navbar-burger {
+      display: none;
+  }
+}
+
+/* Darle estilo al logo de home.html */
+.logo-name {
+  margin-left: 0.5rem;
+  font-weight: bold;
+}
+
+/* Darle estilo a los botones de home.html */
+.button {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;  
+  padding: 1.75em 1.90em;  
+  border-radius: 0.5rem; 
+}
+

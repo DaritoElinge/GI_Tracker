@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="{{ url_for('inicio') }}">
+                <img src="{{ url_for('static', filename='img/icon/home_icon.svg') }}" alt="Inicio"  width="24" height="24">
+            </a>
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('login') }}">
+                    <img src="{{ url_for('static', filename='img/icon/login_icon.svg') }}" alt="Icono de Login" width="24" height="24" style="margin-right: 3px">Acceso
+                </a>
+                
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-inicio" style="padding-top: 75px;">
+        <div class="section-inicio">
+            <img id="logo_img" src="{{ url_for('static', filename='img/icon/logo_icon.svg') }}" alt="Logo de la Aplicación"  width="24" height="24">
+            <h1 class="title is-1 has-text-centered">Bienvenido a GI - Tracker</h1>
+            <p class="subtitle is-4 has-text-centered">Redescubre una nueva manera de administrar tus finanzas. Hazlo sin complicaciones.</p>
+
+            <div class="columns is-centered">
+                <div class="column is-three-quarters">
+                    <div class="box">
+                        <h2 class="title is-4">¿Qué ofrece nuestra aplicación?</h2>
+                        <ul>
+                            <li><i class="fas fa-calendar-check"></i> Registro de ingresos y gastos</li>
+                            <li><i class="fas fa-chart-line"></i> Visualización de reportes y gráficos</li>
+                            <li><i class="fa-solid fa-calendar-days"></i> Establece un presupuesto</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="has-text-centered">
+                <a class="button is-success is-large" href="{{ url_for('login') }}">¡Empieza ahora!</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

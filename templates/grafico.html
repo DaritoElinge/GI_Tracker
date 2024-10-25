@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <!--Google Fonts SUSE-->
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Volver Atrás
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="section-grafico" style="margin-top: 75px";>
+        <div class="container">
+            <h1 class="title">Comparación de tus Ingresos y tus Gastos</h1>
+            <div class="box">
+                <p><strong>Ingresos Totales:</strong> ${{ ingresos }}</p>
+                <p><strong>Gastos Totales:</strong> ${{ gastos }}</p>
+                <p><strong>Saldo:</strong> ${{ saldo | round(2) }}</p>
+            </div>
+
+            <div class="columns">
+                <div class="column">
+                    <h2 class="subtitle">Tus Gastos por Categoría</h2>
+                    <canvas id="gastosChart"></canvas>
+                </div>
+                <div class="column">
+                    <h2 class="subtitle"> Ingresos y Gastos</h2>
+                    <canvas id="comparacionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Gráfico de pastel para categorías de gastos
+        const categoriasGastos = {{ categorias_gastos | tojson }};
+        const ctxGastos = document.getElementById('gastosChart').getContext('2d');
+        const gastosChart = new Chart(ctxGastos, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(categoriasGastos),
+                datasets: [{
+                    data: Object.values(categoriasGastos),
+                    // Colores para el gráfico pastel
+                    backgroundColor: ['#ff6384', '#EB7F36', '#cc65fe', '#ffce56', '#D47BB8'],
+                }]
+            },
+        });
+
+        // Gráfico de barras para comparación de ingresos y gastos
+        const ctxComparacion = document.getElementById('comparacionChart').getContext('2d');
+        const comparacionChart = new Chart(ctxComparacion, {
+            type: 'bar',
+            data: {
+                labels: ['Ingresos', 'Gastos'],
+                datasets: [{
+                    label: 'Cantidad',
+                    data: [{{ ingresos }}, {{ gastos }}],
+                    // Colores para el gráfico de barras
+                    backgroundColor: ['#1DA50D', '#ff6384'],
+                }]
+            },
+        });
+        // Para sacar el icono de hamburguesa para hacerlo responsive
+        document.addEventListener('DOMContentLoaded', () => {
+            const burgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            if (burgers.length > 0) {
+                burgers.forEach((burger) => {
+                    burger.addEventListener('click', () => {
+                        const target = document.getElementById(burger.dataset.target);
+                        burger.classList.toggle('is-active');
+                        target.classList.toggle('is-active');
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

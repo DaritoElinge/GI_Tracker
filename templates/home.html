@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GI Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <script src="https://kit.fontawesome.com/18827c31dd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icon/logo_icon.svg') }}">
+    <!--Google Fonts SUSE-->
+    <link href="https://fonts.googleapis.com/css2?family=SUSE:wght@100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-fixed-top is-light">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='img/icon/logo_icon.svg') }}" alt="Inicio" width="36" height="36">
+                <span class="logo-name">GI Tracker</span>
+            </a>
+            <button class="navbar-burger burger" data-target="navbarMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="{{ url_for('home') }}">
+                    <i class="fa-solid fa-house" style="padding: 5px"></i> Inicio
+                </a>
+
+                <!-- Dropdown para Ajustes -->
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">
+                        <i class="fa-solid fa-gear" style="padding: 5px"></i> Ajustes
+                    </a>
+
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" href="{{ url_for('login_history') }}">
+                            <i class="fa-solid fa-history" style="padding: 5px"></i> Historial de inicio de sesión
+                        </a>
+                        <!-- Aquí puedes agregar más opciones al menú de Ajustes si lo necesitas -->
+                    </div>
+                </div>
+
+                <a class="navbar-item" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt" style="padding: 5px"></i> Salir
+                </a>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Main Content -->
+    <section class="section-home" style="margin-top: 75px;">
+        <div class="container-home">
+            <h1 class="title">Bienvenido a GI Tracker</h1>
+            <p class="subtitle">Visualiza y gestiona tus gastos e ingresos de manera sencilla.</p>
+
+            <!-- Buttons/Modules -->
+            <div class="columns is-multiline">
+                <div class="column is-one-third">
+                    <a class="button is-fullwidth is-danger" href="{{ url_for('listar_gastos') }}">
+                        <i class="fas fa-money-bill-wave" style="padding: 10px"></i> Gastos
+                    </a>
+                </div>
+                <div class="column is-one-third">
+                    <a class="button is-fullwidth is-info" href="{{ url_for('listar_ingresos') }}">
+                        <i class="fas fa-coins" style="padding: 10px"></i> Ingresos
+                    </a>
+                </div>
+                <div class="column is-one-third">
+                    <a class="button is-fullwidth is-warning" href="{{ url_for('grafico') }}">
+                        <i class="fa-solid fa-chart-pie" style="padding: 10px"></i> Gráficos
+                    </a>
+                </div>
+                <div class="column is-one-third">
+                    <a class="button is-fullwidth is-primary" href="{{ url_for('presupuesto') }}">
+                        <i class="fa-solid fa-calendar-days" style="padding: 10px"></i> Presupuesto
+                    </a>
+                </div>
+                <div class="column is-one-third">
+                    <a class="button is-fullwidth is-dark" href="{{ url_for('seleccionar_reporte') }}">
+                        <i class="fas fa-file-alt" style="padding: 10px"></i> Reporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
